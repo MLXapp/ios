@@ -1,0 +1,5 @@
+MLXiOS.xcodeproj
+build
+shots
+*.log
+.DS_Store

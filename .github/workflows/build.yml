@@ -1,0 +1,40 @@
+name: Build and test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: macos-26
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select the newest Xcode
+        run: |
+          XC=$(ls -d /Applications/Xcode_2[6-9]*.app 2>/dev/null | sort -V | tail -1)
+          [ -n "$XC" ] || XC=/Applications/Xcode.app
+          sudo xcode-select -s "$XC/Contents/Developer"
+          xcodebuild -version
+
+      - name: Generate the Xcode project
+        run: |
+          brew install xcodegen
+          xcodegen generate
+
+      - name: Build and run UI tests (iPhone simulator)
+        run: |
+          set -o pipefail
+          PHONE=$(xcrun simctl list devices available | grep -E "iPhone [0-9]+ Pro" | tail -1 | sed -E 's/^ *(.*) \(([0-9A-F-]{36})\).*/\2/')
+          xcrun simctl boot "$PHONE" || true
+          xcrun simctl bootstatus "$PHONE" -b
+          xcodebuild test -project MLXiOS.xcodeproj -scheme MLX -destination "id=$PHONE" \
+            -derivedDataPath build CODE_SIGNING_ALLOWED=NO 2>&1 | tee test.log \
+            | grep -E "error:|Test Case .*(passed|failed)|Executed|\*\* TEST" || (tail -120 test.log; exit 1)
