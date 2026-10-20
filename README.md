@@ -2,7 +2,7 @@
 
 The companion app for [MLX Network](https://mlx.app): see your Macs working, pause or resume them, change their limits and follow what they mine, from anywhere.
 
-[Download](https://mlx.app/download) · [MLX for macOS](https://github.com/MLXapp/mac) · [Live map](https://world.mlx.app)
+[Download](https://mlx.app/download) · [MLX Node for Mac](https://github.com/MLXapp/mac) · [Live map](https://world.mlx.app)
 
 ## What it does
 
